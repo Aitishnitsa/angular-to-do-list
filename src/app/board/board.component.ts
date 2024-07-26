@@ -20,8 +20,8 @@ import { TaskContainer } from '../task-container';
 })
 export class BoardComponent {
   taskContainers: TaskContainer[] = [
-    { id: "todo", title: "To do", color: "bg-red-200" },
-    { id: "inprogress", title: "In progress", color: "bg-blue-200" },
-    { id: "done", title: "Done", color: "bg-green-200" },
+    { type: "todo", title: "To do", color: "bg-red-200" },
+    { type: "inprogress", title: "In progress", color: "bg-blue-200" },
+    { type: "done", title: "Done", color: "bg-green-200" },
   ];
 }

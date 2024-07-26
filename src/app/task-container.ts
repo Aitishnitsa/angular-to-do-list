@@ -1,5 +1,5 @@
 export interface TaskContainer {
-    id: string;
+    type: string;
     title: string;
     color: string;
 }
