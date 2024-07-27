@@ -1,16 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../environments/environment';
 import { Observable } from 'rxjs';
+import { environment } from '../environments/environment';
 import { Task } from './task';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TaskService {
-  URI = `https://${environment.API_KEY}.mockapi.io/tasks`;
+  private URI = `https://${environment.API_KEY}.mockapi.io/tasks`;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   fetchTasks(): Observable<Task[]> {
     return this.http.get<Task[]>(this.URI);
@@ -22,5 +22,9 @@ export class TaskService {
 
   deleteTask(id: string): Observable<void> {
     return this.http.delete<void>(`${this.URI}/${id}`);
+  }
+
+  updateTask(task: Task): Observable<Task> {
+    return this.http.put<Task>(`${this.URI}/${task.id}`, task);
   }
 }
