@@ -24,6 +24,20 @@ import { TaskService } from '../task.service';
       >
       </app-task>
     </div>
+    @if (addingMode) {
+    <form
+      (submit)="handleSubmit($event)"
+      class="border-2 border-black dark:border-white rounded-md w-full py-1 px-2 my-2"
+    >
+      <input
+        [value]="newTaskText"
+        (input)="handleInput($event)"
+        name="input"
+        placeholder="Enter new task"
+        class="focus-visible:outline-none w-full bg-transparent"
+      />
+    </form>
+    }
     <button
       class="animate-flip-up animate-delay-300 px-2 opacity-25 hover:opacity-100 transition ease-in-out duration-150"
       (click)="onAddClick()"
