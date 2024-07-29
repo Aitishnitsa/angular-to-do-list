@@ -12,31 +12,18 @@ import { TaskService } from '../task.service';
   template: `
     <h1
       [class]="taskContainer.color"
-      class="text-black dark:text-black animate-jump-in w-full rounded-full py-1 flex
-        justify-center font-bold relative z-10"
+      class="text-black dark:text-black animate-jump-in w-full rounded-full py-1 flex justify-center font-bold relative z-10"
     >
       {{ taskContainer.title }}
     </h1>
-    <app-task
-      *ngFor="let task of filteredTasks"
-      [task]="task"
-      (taskDeleted)="handleTaskDeleted($event)"
-    >
-    </app-task>
-    @if (addingMode) {
-    <form
-      (submit)="handleSubmit($event)"
-      class="border-2 border-black dark:border-white rounded-md w-full py-1 px-2 my-2"
-    >
-      <input
-        [value]="newTaskText"
-        (input)="handleInput($event)"
-        name="input"
-        placeholder="Enter new task"
-        class="focus-visible:outline-none w-full bg-transparent"
-      />
-    </form>
-    }
+    <div (dragover)="onDragOver($event)" (drop)="onDrop($event)">
+      <app-task
+        *ngFor="let task of filteredTasks"
+        [task]="task"
+        (taskDeleted)="handleTaskDeleted($event)"
+      >
+      </app-task>
+    </div>
     <button
       class="animate-flip-up animate-delay-300 px-2 opacity-25 hover:opacity-100 transition ease-in-out duration-150"
       (click)="onAddClick()"
@@ -56,6 +43,10 @@ export class TaskContainerComponent {
   constructor(private tasksService: TaskService) {}
 
   ngOnInit(): void {
+    this.loadTasks();
+  }
+
+  loadTasks(): void {
     this.tasksService.fetchTasks().subscribe((tasks) => {
       this.tasks = tasks;
       this.filterTasks();
@@ -96,5 +87,22 @@ export class TaskContainerComponent {
   handleTaskDeleted(taskId: string) {
     this.tasks = this.tasks.filter((task) => task.id !== taskId);
     this.filterTasks();
+  }
+
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+  }
+
+  onDrop(event: DragEvent) {
+    event.preventDefault();
+    const taskData = event.dataTransfer?.getData('text/plain');
+    if (taskData) {
+      const task: Task = JSON.parse(taskData);
+      const updatedTask = { ...task, status: this.taskContainer.type };
+
+      this.tasksService.updateTask(updatedTask).subscribe(() => {
+        this.loadTasks();
+      });
+    }
   }
 }

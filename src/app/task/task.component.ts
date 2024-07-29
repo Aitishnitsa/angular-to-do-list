@@ -1,11 +1,12 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { Task } from '../task';
 import { TaskService } from '../task.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-task',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   template: `
     <div
       class="hover:bg-gray-50
@@ -13,6 +14,9 @@ import { TaskService } from '../task.service';
         dark:border-white rounded-md w-full py-1 px-2 my-2 flex justify-between items-center group"
       (mouseenter)="onMouseEnter()"
       (mouseleave)="onMouseLeave()"
+      draggable="true"
+      (dragstart)="onDragStart($event)"
+      (dragend)="onDragEnd()"
     >
       {{ task.text }}
       @if (isShown) {
@@ -55,6 +59,7 @@ export class TaskComponent {
   @Output() taskDeleted = new EventEmitter<string>();
 
   isShown: boolean = false;
+  dragData: Task | null = null;
 
   constructor(private tasksService: TaskService) {}
 
@@ -71,5 +76,14 @@ export class TaskComponent {
       console.log('deleted!', this.task.id);
       this.taskDeleted.emit(this.task.id);
     });
+  }
+
+  onDragStart(event: DragEvent) {
+    this.dragData = this.task;
+    event.dataTransfer?.setData('text/plain', JSON.stringify(this.task));
+  }
+
+  onDragEnd() {
+    this.dragData = null;
   }
 }
