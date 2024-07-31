@@ -6,7 +6,6 @@ import { CommonModule, DatePipe } from '@angular/common';
   standalone: true,
   imports: [CommonModule, DatePipe],
   templateUrl: './header.component.html',
-  styleUrl: './header.component.css',
 })
 export class HeaderComponent {
   today: number = Date.now();
