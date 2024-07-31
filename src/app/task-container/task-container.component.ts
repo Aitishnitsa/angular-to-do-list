@@ -1,9 +1,11 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TaskContainer } from '../task-container';
 import { TaskComponent } from '../task/task.component';
-import { Task } from '../task';
 import { TaskService } from '../task.service';
+import { Task } from '../task';
+import { Observable } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-task-container',
@@ -16,13 +18,11 @@ import { TaskService } from '../task.service';
     >
       {{ taskContainer.title }}
     </h1>
-    <div (dragover)="onDragOver($event)" (drop)="onDrop($event)">
+    <div>
       <app-task
-        *ngFor="let task of filteredTasks"
+        *ngFor="let task of filteredTasks$ | async"
         [task]="task"
-        (taskDeleted)="handleTaskDeleted($event)"
-      >
-      </app-task>
+      ></app-task>
     </div>
     @if (addingMode) {
     <form
@@ -46,30 +46,20 @@ import { TaskService } from '../task.service';
     </button>
   `,
 })
-export class TaskContainerComponent {
+export class TaskContainerComponent implements OnInit {
   @Input() taskContainer!: TaskContainer;
 
   addingMode: boolean = false;
   newTaskText: string = '';
-  tasks: Task[] = [];
-  filteredTasks: Task[] = [];
+  filteredTasks$!: Observable<Task[]>;
 
-  constructor(private tasksService: TaskService) {}
+  constructor(private taskService: TaskService) {}
 
   ngOnInit(): void {
-    this.loadTasks();
-  }
-
-  loadTasks(): void {
-    this.tasksService.fetchTasks().subscribe((tasks) => {
-      this.tasks = tasks;
-      this.filterTasks();
-    });
-  }
-
-  filterTasks(): void {
-    this.filteredTasks = this.tasks.filter(
-      (task) => task.status === this.taskContainer.type
+    this.filteredTasks$ = this.taskService.tasks$.pipe(
+      map((tasks) =>
+        tasks.filter((task) => task.status === this.taskContainer.type)
+      )
     );
   }
 
@@ -90,33 +80,9 @@ export class TaskContainerComponent {
       text: this.newTaskText,
       id: '0',
     };
-    this.tasksService.addTask(newTask).subscribe((task) => {
-      this.tasks.push(task);
-      this.filterTasks();
+    this.taskService.addTask(newTask).subscribe(() => {
       this.addingMode = false;
       this.newTaskText = '';
     });
-  }
-
-  handleTaskDeleted(taskId: string) {
-    this.tasks = this.tasks.filter((task) => task.id !== taskId);
-    this.filterTasks();
-  }
-
-  onDragOver(event: DragEvent) {
-    event.preventDefault();
-  }
-
-  onDrop(event: DragEvent) {
-    event.preventDefault();
-    const taskData = event.dataTransfer?.getData('text/plain');
-    if (taskData) {
-      const task: Task = JSON.parse(taskData);
-      const updatedTask = { ...task, status: this.taskContainer.type };
-
-      this.tasksService.updateTask(updatedTask).subscribe(() => {
-        this.loadTasks();
-      });
-    }
   }
 }
