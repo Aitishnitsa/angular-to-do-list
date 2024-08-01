@@ -1,7 +1,15 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  OnInit,
+  Inject,
+  PLATFORM_ID,
+} from '@angular/core';
 import { Task } from '../task';
 import { TaskService } from '../task.service';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-task',
@@ -9,17 +17,14 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   template: `
     <div
-      class="hover:bg-gray-50
+      class="bg-white dark:bg-black hover:bg-gray-50
         dark:hover:bg-gray-950 animate-slide-in-blurred-top transition ease-in-out duration-150 border-2 border-black
         dark:border-white rounded-md w-full py-1 px-2 my-2 flex justify-between items-center group"
       (mouseenter)="onMouseEnter()"
       (mouseleave)="onMouseLeave()"
-      draggable="true"
-      (dragstart)="onDragStart($event)"
-      (dragend)="onDragEnd()"
     >
       {{ task.text }}
-      @if (isShown) {
+      @if (isShown || screenWidth < 800) {
       <button (click)="onDeleteClick()">
         <svg
           class="fill-black dark:fill-white opacity-25 hover:opacity-100 transition duration-150"
@@ -54,15 +59,24 @@ import { CommonModule } from '@angular/common';
     </div>
   `,
 })
-export class TaskComponent {
+export class TaskComponent implements OnInit {
   @Input() task!: Task;
   @Output() taskDeleted = new EventEmitter<string>();
 
   isShown: boolean = false;
+  screenWidth: any;
   dragData: Task | null = null;
 
-  constructor(private tasksService: TaskService) {}
+  constructor(
+    private tasksService: TaskService,
+    @Inject(PLATFORM_ID) private platformId: any
+  ) {}
 
+  ngOnInit() {
+    if (isPlatformBrowser(this.platformId)) {
+      this.screenWidth = window.innerWidth;
+    }
+  }
   onMouseEnter() {
     this.isShown = true;
   }
@@ -76,14 +90,5 @@ export class TaskComponent {
       console.log('deleted!', this.task.id);
       this.taskDeleted.emit(this.task.id);
     });
-  }
-
-  onDragStart(event: DragEvent) {
-    this.dragData = this.task;
-    event.dataTransfer?.setData('text/plain', JSON.stringify(this.task));
-  }
-
-  onDragEnd() {
-    this.dragData = null;
   }
 }

@@ -1,5 +1,11 @@
-import { Component } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import {
+  Component,
+  Inject,
+  OnDestroy,
+  OnInit,
+  PLATFORM_ID,
+} from '@angular/core';
+import { CommonModule, DatePipe, isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-header',
@@ -7,9 +13,26 @@ import { CommonModule, DatePipe } from '@angular/common';
   imports: [CommonModule, DatePipe],
   templateUrl: './header.component.html',
 })
-export class HeaderComponent {
-  today: number = Date.now();
+export class HeaderComponent implements OnInit, OnDestroy {
   isDarkMode: boolean = false;
+  today: number = Date.now();
+  intervalId: any;
+
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+
+  ngOnInit() {
+    if (isPlatformBrowser(this.platformId)) {
+      this.intervalId = setInterval(() => {
+        this.today = Date.now();
+      }, 1000);
+    }
+  }
+
+  ngOnDestroy() {
+    if (isPlatformBrowser(this.platformId) && this.intervalId) {
+      clearInterval(this.intervalId);
+    }
+  }
 
   onThemeSwitchChange() {
     this.isDarkMode = !this.isDarkMode;
@@ -18,11 +41,4 @@ export class HeaderComponent {
       ? document.documentElement.classList.add('dark')
       : document.documentElement.classList.remove('dark');
   }
-
-  // Error... Page / did not render in 30 seconds.
-  // constructor() {
-  //   setInterval(() => {
-  //     this.today = Date.now();
-  //   }, 1000);
-  // }
 }

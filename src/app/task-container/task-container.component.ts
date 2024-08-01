@@ -4,25 +4,45 @@ import { TaskContainer } from '../task-container';
 import { TaskComponent } from '../task/task.component';
 import { TaskService } from '../task.service';
 import { Task } from '../task';
-import { Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import {
+  CdkDragDrop,
+  CdkDrag,
+  CdkDropList,
+  CdkDropListGroup,
+  moveItemInArray,
+  transferArrayItem,
+} from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-task-container',
   standalone: true,
-  imports: [CommonModule, TaskComponent],
+  imports: [
+    CommonModule,
+    TaskComponent,
+    CdkDropListGroup,
+    CdkDropList,
+    CdkDrag,
+  ],
   template: `
-    <h1
-      [class]="taskContainer.color"
-      class="text-black dark:text-black animate-jump-in w-full rounded-full py-1 flex justify-center font-bold relative z-10"
+    <div
+      cdkDropList
+      [cdkDropListData]="filteredTasks"
+      [cdkDropListConnectedTo]="connectedTo"
+      (cdkDropListDropped)="drop($event)"
     >
-      {{ taskContainer.title }}
-    </h1>
-    <div>
+      <h1
+        [class]="taskContainer.color"
+        class="text-black dark:text-black animate-jump-in w-full rounded-full py-1 flex justify-center font-bold relative z-10"
+      >
+        {{ taskContainer.title }}
+      </h1>
       <app-task
-        *ngFor="let task of filteredTasks$ | async"
+        cdkDrag
+        *ngFor="let task of filteredTasks"
         [task]="task"
-      ></app-task>
+        (taskDeleted)="handleTaskDeleted($event)"
+      >
+      </app-task>
     </div>
     @if (addingMode) {
     <form
@@ -48,31 +68,60 @@ import { map, tap } from 'rxjs/operators';
 })
 export class TaskContainerComponent implements OnInit {
   @Input() taskContainer!: TaskContainer;
+  @Input() connectedTo: string[] = [];
 
   addingMode: boolean = false;
   newTaskText: string = '';
-  filteredTasks$!: Observable<Task[]>;
+  tasks: Task[] = [];
+  filteredTasks: Task[] = [];
 
   constructor(private taskService: TaskService) {}
 
   ngOnInit(): void {
-    this.filteredTasks$ = this.taskService.tasks$.pipe(
-      map((tasks) =>
-        tasks.filter((task) => task.status === this.taskContainer.type)
-      )
+    this.taskService.fetchTasks().subscribe((tasks) => {
+      this.tasks = tasks;
+      this.filterTasks();
+    });
+  }
+
+  filterTasks(): void {
+    this.filteredTasks = this.tasks.filter(
+      (task) => task.status === this.taskContainer.type
     );
   }
 
-  onAddClick() {
+  drop(event: CdkDragDrop<Task[]>): void {
+    if (event.previousContainer === event.container) {
+      moveItemInArray(
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex
+      );
+    } else {
+      transferArrayItem(
+        event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex
+      );
+
+      const updatedTask = event.container.data[event.currentIndex];
+      updatedTask.status = this.taskContainer.type;
+
+      this.taskService.updateTask(updatedTask).subscribe(() => {});
+    }
+  }
+
+  onAddClick(): void {
     this.addingMode = !this.addingMode;
   }
 
-  handleInput(event: Event) {
+  handleInput(event: Event): void {
     const inputElement = event.target as HTMLInputElement;
     this.newTaskText = inputElement.value;
   }
 
-  handleSubmit(event: Event) {
+  handleSubmit(event: Event): void {
     event.preventDefault();
     if (this.newTaskText.trim() === '') return;
     const newTask: Task = {
@@ -81,8 +130,15 @@ export class TaskContainerComponent implements OnInit {
       id: '0',
     };
     this.taskService.addTask(newTask).subscribe(() => {
+      this.tasks.push(newTask);
       this.addingMode = false;
       this.newTaskText = '';
+      this.filterTasks();
     });
+  }
+
+  handleTaskDeleted(taskId: string): void {
+    this.tasks = this.tasks.filter((task) => task.id !== taskId);
+    this.filterTasks();
   }
 }
