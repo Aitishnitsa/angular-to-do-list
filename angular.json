@@ -5,7 +5,12 @@
   "projects": {
     "angular-to-do-list": {
       "projectType": "application",
-      "schematics": {},
+      "schematics": {
+        "@schematics/angular:component": {
+          "inlineTemplate": true,
+          "inlineStyle": true
+        }
+      },
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
@@ -89,14 +94,11 @@
             ],
             "scripts": []
           }
-        },
-        "deploy": {
-          "builder": "angular-cli-ghpages:deploy"
         }
       }
     }
   },
   "cli": {
-    "analytics": "776efaa6-5a43-4eab-bdca-4e8b30859375"
+    "analytics": "0381a897-12e3-4687-a867-668d067ecefc"
   }
 }

@@ -6,14 +6,14 @@
     overflow: hidden;
 }
 
-.cdk-drag-preview > div {
+.cdk-drag-preview>div {
     background: #e5e7eb;
     margin: 0;
     transition: none;
     animation: none;
 }
 
-.dark .cdk-drag-preview > div {
+.dark .cdk-drag-preview>div {
     background: #1f2937;
     color: white;
 }

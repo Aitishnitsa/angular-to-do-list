@@ -25,7 +25,6 @@ import { TaskContainerComponent } from './task-container/task-container.componen
       ></app-board>
     </section>
   `,
-  styleUrl: './app.component.css',
 })
 export class AppComponent {
   title = 'angular-to-do-list';
