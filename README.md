@@ -1,27 +1,58 @@
-# AngularToDoApp
+# To-do App
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.1.1.
+This is a Task Management Board application built with Angular. It allows users to create, delete, and manage tasks across different stages (To do, In progress, Done) using drag-and-drop functionality. The project is designed with standalone components and leverages Angular CDK's drag-and-drop features. It is responsive to both light and dark themes.
 
-## Development server
+Link: https://aitishnitsa.github.io/angular-to-do-list/
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+The same project in React: https://github.com/Aitishnitsa/react-to-do-list
 
-## Code scaffolding
+## Features
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+- Task Creation & Deletion: Add new tasks and delete existing ones.
+- Drag-and-Drop Functionality: Organize tasks into different columns such as "To Do", "In Progress" and "Done".
+- Dark Mode Support: Switch between light and dark modes.
+- Standalone Components: Built using Angular standalone components for better modularity and faster loading times.
+- Responsive Design: The UI adapts to different screen sizes and is mobile-friendly.
+- Task Management with API Integration: Tasks are fetched, added, and deleted from a mock API.
 
-## Build
+## Technologies Used
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+- Angular: For building the UI components and structure.
+- Angular CDK Drag and Drop: For drag-and-drop functionality.
+- Tailwind CSS: For styling and responsiveness.
+- RxJS: For handling asynchronous events and services.
+- TypeScript: For static typing and better developer experience.
+- mockAPI: For tasks fetching.
 
-## Running unit tests
+## Installation
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+1. Clone the repository:
 
-## Running end-to-end tests
+```
+git clone https://github.com/Aitishnitsa/angular-to-do-list.git
+```
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+2. Install dependencies:
 
-## Further help
+```
+npm install
+```
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+3. Set up environment variables:
+
+- Navigate to the src/environments directory.
+- Create a new file environment.ts if it doesn't exist.
+- Add the following configuration with your API key:
+
+```
+export const environment = {
+  production: false,
+  API_KEY: 'your-api-key-here',
+};
+```
+
+4. Start the development server:
+
+```
+ng serve
+```
